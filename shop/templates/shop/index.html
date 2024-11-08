@@ -1,0 +1,122 @@
+{% extends "shop/base.html" %}
+
+{% block body %}
+<div class="container">
+    <div class="row py-5">
+
+        {% for product in products %}
+        <div class="col-md-3 col-sm-6 mb-4">
+            <div class="card">
+
+                <img class="card-img-top" style="height: 25vh;" src="{{product.image}}" alt="">
+                <div class="card-body">
+                    <div class="card-title" style="font-weight: bold;" id="name_{{product.id}}">
+                        {{ product.name }}
+                    </div>
+                    <div class="card-text text-success fs-5" style="font-weight: bold;">
+                        $ <span id="price_{{product.id}}">
+                            {{ product.discount_price }}
+                        </span>
+                    </div>
+                    <div class="card-text text-decoration-line-through text-muted">
+                        $ {{ product.price }}
+                    </div>
+
+                </div>
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="col-md-6 col-sm-6">
+                            <a href="{% url 'shop:product_info' product.id  %}" class="btn btn-warning"
+                                style="font-size: small;">Show Item</a>
+                        </div>
+                        <div class="col-md-6 col-sm-6">
+                            <a href="#" class="btn btn-warning" onclick="AddToCart(this)" id="{{ product.id }}"
+                                style="font-size: small;">Add To Card</a>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+    <div class="row">
+        <div class="col-md-3 offset-md-3">
+            <p>
+                {{ products.number }} of {{ products.paginator.num_pages }}
+            </p>
+
+            <nav aria-label="...">
+                <ul class="pagination">
+                    {% if products.has_previous %}
+                    <li class="page-item">
+                        <a href="?page={{products.previous_page_number}}" class="page-link">Previous</a>
+                    </li>
+                    <li class="page-item"><a class="page-link"
+                            href="?page={{products.previous_page_number}}">{{products.previous_page_number }}
+                        </a></li>
+                    {% endif %}
+                    <li class="page-item active" aria-current="page">
+                        <span class="page-link">{{ products.number }}</span>
+                    </li>
+                    {% if products.has_next %}
+                    <li class="page-item"><a class="page-link"
+                            href="?page={{ products.next_page_number }}">{{products.next_page_number }}</a></li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ products.next_page_number }}">Next</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    var cart_counts = document.getElementById('cart_counts');
+
+    if (localStorage.cart == undefined) {
+        cart_data = '{}'
+    }
+    else {
+        cart_data = localStorage.cart;
+    }
+
+    var cart = JSON.parse(cart_data);
+
+    function AddToCart(btn) {
+
+        let item_id = btn.id;
+        let item_name = document.getElementById(`name_${item_id}`).innerText;
+        let pirce = parseFloat(document.getElementById(`price_${item_id}`).innerText);
+
+        let item_quentity = cart[`${item_id}`]
+
+        if (item_quentity == undefined) {
+            item_quentity = 0;
+        }
+
+        else {
+            item_quentity = item_quentity.quentity
+        }
+
+        item_quentity = item_quentity + 1;
+
+        let amount = pirce * item_quentity
+
+        cart[`${item_id}`] = {"quentity": item_quentity, "item_name": item_name, "amount": amount};
+        console.log(cart);
+        json_cart = JSON.stringify(cart);
+        localStorage.setItem('cart', json_cart)
+        cart_counts.innerText = Object.keys(cart).length;
+    }
+    console.log(cart);
+
+    cart_counts.innerText = Object.keys(cart).length;
+
+</script>
+
+{% endblock %}
